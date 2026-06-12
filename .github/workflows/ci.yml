@@ -47,3 +47,55 @@ jobs:
 
       - name: Ejecutar pruebas unitarias
         run: python -m unittest discover -s . -p "test_*.py" -v
+
+  cd:
+    name: Despliegue a Azure
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    env:
+      RESOURCE_GROUP: AZ-2008
+      APP_NAME: controlproductosaz2008-web
+      APP_SERVICE_PLAN_NAME: controlproductosaz2008-plan
+      APP_INSIGHTS_NAME: controlproductosaz2008-ai
+      LOCATION: eastus
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Iniciar sesion en Azure con Service Principal
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Desplegar plantilla ARM
+        uses: azure/arm-deploy@v2
+        with:
+          subscriptionId: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
+          resourceGroupName: ${{ env.RESOURCE_GROUP }}
+          template: ./arm/template.json
+          parameters: >
+            appName=${{ env.APP_NAME }}
+            appServicePlanName=${{ env.APP_SERVICE_PLAN_NAME }}
+            applicationInsightsName=${{ env.APP_INSIGHTS_NAME }}
+            location=${{ env.LOCATION }}
+            skuName=S1
+            runtimeStack=PYTHON|3.12
+
+      - name: Empaquetar aplicacion
+        run: |
+          zip -r release.zip . \
+            -x ".git/*" \
+            -x ".github/*" \
+            -x "venv/*" \
+            -x "__pycache__/*" \
+            -x "*.pyc" \
+            -x "productos.db"
+
+      - name: Desplegar aplicacion en App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.APP_NAME }}
+          package: release.zip
