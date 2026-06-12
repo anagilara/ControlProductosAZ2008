@@ -1,0 +1,24 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "appName": {
+      "value": "controlproductosaz2008-web"
+    },
+    "appServicePlanName": {
+      "value": "controlproductosaz2008-plan"
+    },
+    "applicationInsightsName": {
+      "value": "controlproductosaz2008-ai"
+    },
+    "location": {
+      "value": "eastus"
+    },
+    "skuName": {
+      "value": "S1"
+    },
+    "runtimeStack": {
+      "value": "PYTHON|3.12"
+    }
+  }
+}
