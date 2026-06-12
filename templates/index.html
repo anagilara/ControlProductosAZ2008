@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Productos - Control AZ2008{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2><i class="bi bi-list-ul"></i> Productos</h2>
+    <a href="{{ url_for('nuevo') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Nuevo Producto
+    </a>
+</div>
+
+<!-- Buscador -->
+<form method="GET" action="{{ url_for('index') }}" class="mb-4">
+    <div class="input-group">
+        <input type="text" name="q" class="form-control" placeholder="Buscar por nombre o categoría..."
+               value="{{ busqueda }}">
+        <button class="btn btn-outline-secondary" type="submit">
+            <i class="bi bi-search"></i> Buscar
+        </button>
+        {% if busqueda %}
+        <a href="{{ url_for('index') }}" class="btn btn-outline-danger">
+            <i class="bi bi-x"></i> Limpiar
+        </a>
+        {% endif %}
+    </div>
+</form>
+
+{% if productos %}
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-primary">
+                <tr>
+                    <th>#</th>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
+                    <th class="text-end">Precio</th>
+                    <th class="text-center">Stock</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in productos %}
+                <tr>
+                    <td class="text-muted">{{ p.id }}</td>
+                    <td>
+                        <a href="{{ url_for('detalle', id=p.id) }}" class="text-decoration-none fw-semibold">
+                            {{ p.nombre }}
+                        </a>
+                        {% if p.descripcion %}
+                        <br><small class="text-muted">{{ p.descripcion[:60] }}{% if p.descripcion|length > 60 %}…{% endif %}</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if p.categoria %}
+                            <span class="badge bg-secondary">{{ p.categoria }}</span>
+                        {% else %}
+                            <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end fw-semibold">${{ "%.2f"|format(p.precio) }}</td>
+                    <td class="text-center">
+                        {% if p.stock == 0 %}
+                            <span class="badge badge-stock-zero">Sin stock</span>
+                        {% elif p.stock <= 5 %}
+                            <span class="badge badge-stock-low">{{ p.stock }}</span>
+                        {% else %}
+                            <span class="badge badge-stock-ok">{{ p.stock }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <a href="{{ url_for('detalle', id=p.id) }}" class="btn btn-sm btn-outline-info" title="Ver detalle">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <a href="{{ url_for('editar', id=p.id) }}" class="btn btn-sm btn-outline-warning" title="Editar">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <form method="POST" action="{{ url_for('eliminar', id=p.id) }}" class="d-inline"
+                              onsubmit="return confirm('¿Eliminar el producto {{ p.nombre }}?')">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<p class="text-muted mt-2"><small>{{ productos|length }} producto(s) encontrado(s).</small></p>
+
+{% else %}
+<div class="text-center py-5">
+    <i class="bi bi-inbox display-1 text-muted"></i>
+    <p class="mt-3 text-muted fs-5">
+        {% if busqueda %}
+            No se encontraron productos para "<strong>{{ busqueda }}</strong>".
+        {% else %}
+            No hay productos registrados aún.
+        {% endif %}
+    </p>
+    <a href="{{ url_for('nuevo') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Agregar primer producto
+    </a>
+</div>
+{% endif %}
+{% endblock %}

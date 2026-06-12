@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ producto.nombre }} - Control AZ2008{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-box-seam"></i> Detalle del Producto</h5>
+                <span class="badge bg-white text-dark">ID: {{ producto.id }}</span>
+            </div>
+            <div class="card-body">
+                <h4 class="fw-bold">{{ producto.nombre }}</h4>
+                {% if producto.categoria %}
+                    <span class="badge bg-secondary mb-3">{{ producto.categoria }}</span>
+                {% endif %}
+
+                <table class="table table-borderless mt-2">
+                    <tr>
+                        <th class="text-muted" style="width:35%">Descripción</th>
+                        <td>{{ producto.descripcion or '—' }}</td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">Precio</th>
+                        <td class="fw-semibold fs-5">${{ "%.2f"|format(producto.precio) }}</td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">Stock</th>
+                        <td>
+                            {% if producto.stock == 0 %}
+                                <span class="badge bg-danger fs-6">Sin stock</span>
+                            {% elif producto.stock <= 5 %}
+                                <span class="badge bg-warning text-dark fs-6">{{ producto.stock }} unidades (bajo)</span>
+                            {% else %}
+                                <span class="badge bg-success fs-6">{{ producto.stock }} unidades</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="text-muted">Fecha de registro</th>
+                        <td>{{ producto.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</td>
+                    </tr>
+                </table>
+
+                <div class="d-flex gap-2 mt-3">
+                    <a href="{{ url_for('editar', id=producto.id) }}" class="btn btn-warning">
+                        <i class="bi bi-pencil"></i> Editar
+                    </a>
+                    <form method="POST" action="{{ url_for('eliminar', id=producto.id) }}"
+                          onsubmit="return confirm('¿Eliminar el producto {{ producto.nombre }}?')">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Eliminar
+                        </button>
+                    </form>
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary ms-auto">
+                        <i class="bi bi-arrow-left"></i> Volver
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
